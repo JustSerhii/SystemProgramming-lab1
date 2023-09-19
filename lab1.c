@@ -19,7 +19,9 @@ int main() {
 
     FILE *file;
     char word[MAX_WORDS][MAX_WORD_LENGTH]; // Array to store unique words
+    char resultWords[MAX_WORDS][MAX_WORD_LENGTH]; // Array to store words with double consonants
     int wordCount = 0; // Number of unique words encountered
+    int resultCount = 0; // Number of words with double consonants
     char line[1000]; // Assuming each line of text can have a maximum of 1000 characters
 
     // Open the file for reading
@@ -39,37 +41,40 @@ int main() {
 
             // Extract a word from the current line
             while (i < len && isalpha(line[i])) {
-                word[wordCount][j] = tolower(line[i]); // Convert the word to lowercase
-                j++;
+                if (j < MAX_WORD_LENGTH) {
+                    word[wordCount][j] = tolower(line[i]); // Convert the word to lowercase
+                    j++;
+                }
                 i++;
             }
 
-            // Null-terminate the word
-            word[wordCount][j] = '\0';
+            if (j < MAX_WORD_LENGTH) {
+                word[wordCount][j] = '\0';
 
-            // Check if the word contains double consonants
-            int hasDoubleConsonants = 0;
-            int wordLength = strlen(word[wordCount]);
-            for (int k = 0; k < wordLength - 1; k++) {
-                if (isConsonant(word[wordCount][k]) && word[wordCount][k] == word[wordCount][k + 1]) {
-                    hasDoubleConsonants = 1;
-                    break; // No need to continue checking
-                }
-            }
-
-            // If the word has double consonants and it's not in the list of unique words, add it
-            if (hasDoubleConsonants) {
-                int isNewWord = 1;
-                for (int w = 0; w < wordCount; w++) {
-                    if (strcmp(word[wordCount], word[w]) == 0) {
-                        isNewWord = 0;
-                        break;
+                // Check if the word contains double consonants
+                int hasDoubleConsonants = 0;
+                int wordLength = strlen(word[wordCount]);
+                for (int k = 0; k < wordLength - 1; k++) {
+                    if (isConsonant(word[wordCount][k]) && word[wordCount][k] == word[wordCount][k + 1]) {
+                        hasDoubleConsonants = 1;
+                        break; // No need to continue checking
                     }
                 }
 
-                if (isNewWord) {
-                    printf("%s\n", word[wordCount]);
-                    wordCount++;
+                // If the word has double consonants, add it to resultWords
+                if (hasDoubleConsonants) {
+                    int isNewWord = 1;
+                    for (int w = 0; w < resultCount; w++) {
+                        if (strcmp(word[wordCount], resultWords[w]) == 0) {
+                            isNewWord = 0;
+                            break;
+                        }
+                    }
+
+                    if (isNewWord) {
+                        strcpy(resultWords[resultCount], word[wordCount]);
+                        resultCount++;
+                    }
                 }
             }
 
@@ -80,8 +85,12 @@ int main() {
         }
     }
 
-    // Close the file
-    fclose(file);
+    // Print the result words
+    printf("Words with double consonants:\n");
+    for (int i = 0; i < resultCount; i++) {
+        printf("%s\n", resultWords[i]);
+    }
 
+    fclose(file);
     return 0;
 }
